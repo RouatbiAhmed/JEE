@@ -71,6 +71,19 @@
                            class="form-control"
                            required>
                 </div>
+                <!-- Catégorie -->
+                <div class="mb-3">
+                      <label class="form-label">Catégorie :</label>
+                       <select name="categorieId" class="form-select">
+                         <option value="">-- Sélectionner une catégorie --</option>
+                         <c:forEach var="cat" items="${categories}">
+                                   <option value="${cat.id}" 
+                                      <c:if test="${produit.categorie.id eq cat.id}">selected</c:if>>
+                                      ${cat.nom}
+                          </option>
+                </c:forEach>
+               </select>
+                  </div>
 
                 <!-- Bouton -->
                 <button type="submit" class="btn btn-success">

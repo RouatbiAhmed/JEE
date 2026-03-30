@@ -1,6 +1,7 @@
 package web;
 
 import java.io.IOException;
+
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import dao.GestoionProduitsImp;
+import dao.GestionProduitsImpJpa;
 import dao.IGestionProduit;
 import entity.Produit;
 
@@ -36,7 +37,7 @@ public class FirstServlet extends HttpServlet {
     IGestionProduit gestion;
 	public void init(ServletConfig config) throws ServletException {
 		// TODO Auto-generated method stub
-		gestion=new GestoionProduitsImp();
+		gestion=new GestionProduitsImpJpa();
 	}
 
 	/**

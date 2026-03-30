@@ -1,6 +1,8 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="entity.Utilisateur" %>
+<%@ page import="javax.servlet.http.HttpSession" %>
 
 <!DOCTYPE html>
 <html>
@@ -18,6 +20,13 @@
 <body>
 
 <%@include file="nav.html" %>
+
+<%
+    // Récupérer l'utilisateur connecté depuis la session
+    HttpSession sessionHttp = request.getSession(false);
+    Utilisateur currentUser = (sessionHttp != null) ? (Utilisateur) sessionHttp.getAttribute("user") : null;
+    boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getRole());
+%>
 
 <div class="container mt-4">
 
@@ -40,6 +49,7 @@
                 <th>Nom</th>
                 <th>Prix</th>
                 <th>Quantite</th>
+                <th>Catégorie</th> 
                 <th>Actions</th>
             </tr>
         </thead>
@@ -49,7 +59,7 @@
             <!-- ====== SI LISTE VIDE ====== -->
             <c:if test="${empty products}">
                 <tr>
-                    <td colspan="6" class="text-center text-warning">
+                    <td colspan="7" class="text-center text-warning">
                         Aucun produit trouvé.
                     </td>
                 </tr>
@@ -74,29 +84,34 @@
                     <!-- Id -->
                     <td>${p.id}</td>
 
-                    <!-- Nom + Badges -->
-                    <td>
-                        ${p.nom}
-                    </td>
+                    <!-- Nom -->
+                    <td>${p.nom}</td>
 
                     <!-- Prix -->
                     <td>${p.prix}</td>
 
                     <!-- Quantite -->
                     <td>${p.quantite}</td>
+                    
+                    <!-- Catégorie -->
+                    <td>${p.categorie != null ? p.categorie.nom : 'Sans catégorie'}</td>
 
                     <!-- Actions -->
                     <td>
-                        <a href="update?id=${p.id}" 
-                           class="btn btn-warning btn-sm">
-                           <i class="fa fa-edit"></i>
-                        </a>
+                        <% if (isAdmin) { %>
+                            <a href="update?id=${p.id}" 
+                               class="btn btn-warning btn-sm">
+                               <i class="fa fa-edit"></i>
+                            </a>
 
-                        <a href="delete?id=${p.id}" 
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Confirmer la suppression ?');">
-                           <i class="fa fa-trash"></i>
-                        </a>
+                            <a href="delete?id=${p.id}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Confirmer la suppression ?');">
+                               <i class="fa fa-trash"></i>
+                            </a>
+                        <% } else { %>
+                            <span class="text-muted">Aucune action</span>
+                        <% } %>
                     </td>
 
                 </tr>
@@ -110,4 +125,3 @@
 
 </body>
 </html>
-

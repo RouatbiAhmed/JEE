@@ -1,4 +1,6 @@
 <%@page import="entity.Produit"%>
+<%@page import="entity.Categorie"%>
+<%@page import="entity.Utilisateur"%>
 <%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -21,7 +23,15 @@
 <%@include file="nav.html" %>
 
 <%
+    // Récupérer l'utilisateur connecté depuis la session
+    HttpSession sessionHttp = request.getSession(false);
+    Utilisateur currentUser = (sessionHttp != null) ? (Utilisateur) sessionHttp.getAttribute("user") : null;
+    boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getRole());
+    
     List<Produit> liste = (List<Produit>) request.getAttribute("products");
+    if (liste == null) {
+        liste = new java.util.ArrayList<>();
+    }
 %>
 
 <div class="container mt-4">
@@ -42,12 +52,21 @@
                 <th>Nom</th>
                 <th>Prix</th>
                 <th>Quantite</th>
+                <th>Catégorie</th> 
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         <%
-            if (liste != null) {
+            if (liste.isEmpty()) {
+        %>
+            <tr>
+                <td colspan="6" class="text-center text-warning">
+                    Aucun produit trouvé.
+                </td>
+            </tr>
+        <%
+            } else {
                 for (Produit p : liste) {
         %>
             <tr>
@@ -55,22 +74,27 @@
                 <td><%= p.getNom() %></td>
                 <td><%= p.getPrix() %></td>
                 <td><%= p.getQuantite() %></td>
-                
                 <td>
-    <!-- Bouton Modifier -->
-    <a href="update?id=<%= p.getId() %>" 
-       class="btn btn-warning btn-sm">
-       <i class="fa fa-edit"></i>
-    </a>
+                    <%= p.getCategorie() != null ? p.getCategorie().getNom() : "Sans catégorie" %>
+                </td>
+                <td>
+                    <% if (isAdmin) { %>
+                        <!-- Bouton Modifier -->
+                        <a href="update?id=<%= p.getId() %>" 
+                           class="btn btn-warning btn-sm">
+                           <i class="fa fa-edit"></i>
+                        </a>
 
-    <!-- Bouton Supprimer -->
-    <a href="delete?id=<%= p.getId() %>" 
-       class="btn btn-danger btn-sm"
-       onclick="return confirm('Confirmer la suppression ?');">
-       <i class="fa fa-trash"></i>
-    </a>
-</td>
-
+                        <!-- Bouton Supprimer -->
+                        <a href="delete?id=<%= p.getId() %>" 
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Confirmer la suppression ?');">
+                           <i class="fa fa-trash"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="text-muted">Aucune action</span>
+                    <% } %>
+                </td>
             </tr>
         <%
                 }

@@ -9,103 +9,144 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import dao.GestoionProduitsImp;
+import dao.GestionCategorieImpJpa;
+import dao.GestionProduitsImpJpa;
+import dao.IGestionCategorie;
 import dao.IGestionProduit;
+import entity.Categorie;
 import entity.Produit;
+import entity.Utilisateur;
 
-@WebServlet(urlPatterns = { "/", "/acceuil" , "/search" , "/delete" ,"/ajout" , "/save" , "/update" })
+@WebServlet(urlPatterns = { "/", "/acceuil", "/search", "/delete", "/ajout", "/save", "/update" })
 public class Controller extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	IGestionProduit gestion;
+    IGestionProduit gestion;
+    IGestionCategorie gestionCategorie;
 
-	public void init(ServletConfig config) throws ServletException {
-		gestion = new GestoionProduitsImp();
-	}
+    public void init(ServletConfig config) throws ServletException {
+        gestion = new GestionProduitsImpJpa();
+        gestionCategorie = new GestionCategorieImpJpa();
+    }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-		String path = request.getServletPath();
+        String path = request.getServletPath();
+        
+        System.out.println("=== doGet appelé avec path: " + path + " ===");
+        
+        // ====== TRAITEMENT DES REQUÊTES ======
+        if (path.equals("/") || path.equals("/acceuil")) {
+            
+            System.out.println("Traitement de /acceuil");
+            
+            List<Produit> liste = gestion.getAllProduits();
+            request.setAttribute("products", liste);
+            
+            System.out.println("Nombre de produits trouvés: " + (liste != null ? liste.size() : 0));
+            
+            request.getRequestDispatcher("accueil.jsp").forward(request, response);
+            return; // IMPORTANT: arrêter l'exécution ici
 
-		if (path.equals("/") || path.equals("/acceuil")) {
+        } else if (path.equals("/search")) {
 
-			List<Produit> liste = gestion.getAllProduits();
-			request.setAttribute("products", liste);
+            String mc = request.getParameter("mc");
+            System.out.println("Recherche avec mot clé: " + mc);
+            
+            List<Produit> liste = gestion.getProductByMC(mc);
+            request.setAttribute("products", liste);
+            
+            request.getRequestDispatcher("accueil.jsp").forward(request, response);
+            return; // IMPORTANT: arrêter l'exécution ici
 
-		} else if (path.equals("/search")) {
+        } else if (path.equals("/delete")) {
 
-			String mc = request.getParameter("mc");
-			List<Produit> liste = gestion.getProductByMC(mc);
-			request.setAttribute("products", liste);
+            int id = Integer.parseInt(request.getParameter("id"));
+            System.out.println("Suppression du produit ID: " + id);
+            
+            gestion.deleteProduit(id);
+            
+            response.sendRedirect("acceuil");
+            return; // IMPORTANT: arrêter l'exécution ici
+            
+        } else if (path.equals("/ajout")) {
+            
+            System.out.println("Affichage formulaire ajout");
+            
+            List<Categorie> categories = gestionCategorie.getAllCategories();
+            request.setAttribute("categories", categories);
+            
+            request.getRequestDispatcher("ajouter.jsp").forward(request, response);
+            return; // IMPORTANT: arrêter l'exécution ici
+            
+        } else if (path.equals("/update")) {
 
-		} else if (path.equals("/delete")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            System.out.println("Modification du produit ID: " + id);
+            
+            Produit p = gestion.getProduct(id);
+            request.setAttribute("produit", p);
+            
+            List<Categorie> categories = gestionCategorie.getAllCategories();
+            request.setAttribute("categories", categories);
+            
+            request.getRequestDispatcher("ajouter.jsp").forward(request, response);
+            return; // IMPORTANT: arrêter l'exécution ici
+        }
 
-			int id = Integer.parseInt(request.getParameter("id"));
-			gestion.deleteProduit(id);
+        // Si aucun chemin ne correspond, rediriger vers accueil
+        System.out.println("Aucun chemin trouvé, redirection vers accueil");
+        response.sendRedirect("acceuil");
+    }
 
-			List<Produit> liste = gestion.getAllProduits();
-			request.setAttribute("products", liste);
-			response.sendRedirect("accueil");
-			return;
-		}
-		else if(path.equals("/ajout")) {
-			request.getRequestDispatcher("ajouter.jsp").forward(request, response);
-			return;
-			
-		}
-		else if (path.equals("/update")) {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-		    int id = Integer.parseInt(request.getParameter("id"));
+        String path = request.getServletPath();
+        
+        System.out.println("=== doPost appelé avec path: " + path + " ===");
 
-		    Produit p = gestion.getProduct(id);
+        if (path.equals("/save")) {
 
-		    request.setAttribute("produit", p);
+            int id = 0;
+            if (request.getParameter("id") != null && !request.getParameter("id").isEmpty()) {
+                id = Integer.parseInt(request.getParameter("id"));
+            }
 
-		    request.getRequestDispatcher("ajouter.jsp")
-		           .forward(request, response);
+            String nom = request.getParameter("nom");
+            double prix = Double.parseDouble(request.getParameter("prix"));
+            int quantite = Integer.parseInt(request.getParameter("quantite"));
+            
+            Long categorieId = null;
+            if (request.getParameter("categorieId") != null && !request.getParameter("categorieId").isEmpty()) {
+                categorieId = Long.parseLong(request.getParameter("categorieId"));
+            }
 
-		    return;
-		}
+            Produit p = new Produit(id, nom, prix, quantite);
+            
+            if (categorieId != null && categorieId > 0) {
+                Categorie categorie = gestionCategorie.getCategorieById(categorieId);
+                if (categorie != null) {
+                    p.setCategorie(categorie);
+                }
+            }
 
+            if (id == 0) {
+                gestion.addProduct(p);
+                System.out.println("Produit ajouté: " + nom);
+            } else {
+                gestion.updateProduit(p);
+                System.out.println("Produit modifié: " + nom);
+            }
 
-		request.getRequestDispatcher("accueil.jsp").forward(request, response);
-	}
+            response.sendRedirect("acceuil");
+            return;
+        }
 
-	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-
-	    String path = request.getServletPath();
-
-	    if(path.equals("/save")) {
-
-	        int id = 0;
-
-	        if(request.getParameter("id") != null && 
-	           !request.getParameter("id").isEmpty()) {
-
-	            id = Integer.parseInt(request.getParameter("id"));
-	        }
-
-	        String nom = request.getParameter("nom");
-	        double prix = Double.parseDouble(request.getParameter("prix"));
-	        int quantite = Integer.parseInt(request.getParameter("quantite"));
-
-	        Produit p = new Produit(id, nom, prix, quantite);
-
-	        if(id == 0) {
-	            gestion.addProduct(p);      // INSERT
-	        } else {
-	            gestion.updateProduit(p);   // UPDATE
-	        }
-
-	        response.sendRedirect("acceuil");
-	        return;
-	    }
-
-	    doGet(request, response);
-	}
-
+        // Si ce n'est pas /save, rediriger vers doGet
+        doGet(request, response);
+    }
 }

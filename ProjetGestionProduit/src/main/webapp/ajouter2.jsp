@@ -1,4 +1,7 @@
 <%@page import="entity.Produit"%>
+<%@page import="entity.Categorie"%>
+<%@page import="entity.Produit"%>
+<%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%
@@ -71,6 +74,26 @@
                            class="form-control" 
                            required>
                 </div>
+                <!-- Catégorie -->
+                <div class="mb-3">
+               <label class="form-label">Catégorie :</label>
+             <select name="categorieId" class="form-select">
+              <option value="">-- Sélectionner une catégorie --</option>
+           <%
+                List<Categorie> categories = (List<Categorie>) request.getAttribute("categories");
+               if (categories != null) {
+                   for (Categorie cat : categories) {
+              %>
+              <option value="<%= cat.getId() %>" 
+            <%= (p != null && p.getCategorie() != null && p.getCategorie().getId().equals(cat.getId())) ? "selected" : "" %>>
+            <%= cat.getNom() %>
+            </option>
+             <%
+                          }
+                  }
+             %>
+               </select>
+              </div>
 
                 <button type="submit" class="btn btn-success">
                     <i class="fa fa-save"></i> <%= action %>
