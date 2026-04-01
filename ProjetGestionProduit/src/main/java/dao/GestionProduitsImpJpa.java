@@ -31,7 +31,6 @@ public class GestionProduitsImpJpa implements IGestionProduit {
         }
     }
 
-    // Vos autres méthodes restent identiques...
     
     @Override
     public void addProduct(Produit p) {

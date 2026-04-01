@@ -1,3 +1,4 @@
+
 package dao;
 
 import java.util.List;
@@ -24,7 +25,6 @@ public class GestionUtilisateurImpJpa implements IGestionUtilisateur {
     @Override
     public Utilisateur authenticate(String username, String password) {
         try {
-            // Requête pour trouver l'utilisateur avec username et password
             TypedQuery<Utilisateur> query = em.createQuery(
                 "SELECT u FROM Utilisateur u WHERE u.username = :username AND u.password = :password",
                 Utilisateur.class);
