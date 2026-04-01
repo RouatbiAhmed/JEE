@@ -19,13 +19,7 @@ public class Categorie implements Serializable {
     @Column(length = 500)
     private String description;
     
-    // Relation OneToMany bidirectionnelle avec Produit
-    // mappedBy: indique que la relation est gérée par l'attribut "categorie" dans Produit
-    // cascade: les opérations (persist, merge, remove) sont propagées aux produits
-    // fetch: LAZY = chargement paresseux (charge les produits seulement quand on y accède)
-    @OneToMany(mappedBy = "categorie", 
-               cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
-               fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "categorie", cascade = {CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private List<Produit> produits = new ArrayList<>();
     
     // Constructeurs

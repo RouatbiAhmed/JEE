@@ -16,11 +16,8 @@ public class Produit {
     private double prix;
     private int quantite;
     
-    // Relation ManyToOne avec Categorie
-    // @JoinColumn: définit la colonne de jointure dans la table produit
-    // fetch: EAGER = chargement immédiat (charge la catégorie en même temps que le produit)
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "categorie_id")
+    @ManyToOne(fetch = FetchType.EAGER, optional= false)
+    @JoinColumn(name = "categorie_id", nullable = false)
     private Categorie categorie;
 
     // Constructeurs
