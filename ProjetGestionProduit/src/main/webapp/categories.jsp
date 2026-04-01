@@ -9,76 +9,100 @@
     <title>Gestion des Catégories</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table-styles.css">
 </head>
 <body>
 
-<%@include file="nav.html" %>
+<%@include file="nav.jsp" %>
 
-<%
-    // Vérifier si l'utilisateur est ADMIN
-    HttpSession sessionHttp = request.getSession(false);
-    Utilisateur currentUser = (sessionHttp != null) ? (Utilisateur) sessionHttp.getAttribute("user") : null;
-    boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getRole());
-    
-    if (!isAdmin) {
-        response.sendRedirect("acceuil");
-        return;
-    }
-%>
-
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3><i class="fa fa-list"></i> Gestion des Catégories</h3>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h3 class="mb-0">
+                <i class="fas fa-tags me-2"></i>
+                Gestion des Catégories
+            </h3>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             
-            <a href="categories?action=add" class="btn btn-success mb-3">
-                <i class="fa fa-plus"></i> Nouvelle Catégorie
-            </a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="table-stats">
+                    <i class="fas fa-database"></i> Total: <strong>${categories.size()}</strong> catégorie(s)
+                </div>
+                <a href="categories?action=add" class="btn btn-new">
+                    <i class="fas fa-plus-circle me-2"></i> Nouvelle Catégorie
+                </a>
+            </div>
             
-            <table class="table table-bordered table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:if test="${empty categories}">
-                        <tr>
-                            <td colspan="4" class="text-center text-warning">
-                                Aucune catégorie trouvée.
-                             </td>
-                         </tr>
-                    </c:if>
-                    
-                    <c:forEach var="cat" items="${categories}">
-                        <tr>
-                            <td>${cat.id}</td>
-                            <td>${cat.nom}</td>
-                            <td>${cat.description}</td>
-                            <td>
-                                <a href="categories?action=edit&id=${cat.id}" 
-                                   class="btn btn-warning btn-sm">
-                                   <i class="fa fa-edit"></i>
-                                </a>
-                                <a href="categories?action=delete&id=${cat.id}" 
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Supprimer cette catégorie ?')">
-                                   <i class="fa fa-trash"></i>
-                                </a>
-                            </td>
+            <div class="table-container">
+                <table class="table">
+	                    <thead><th width="10%">ID</th>
+                            <th width="25%">Nom</th>
+                            <th width="45%">Description</th>
+                            <th width="20%" class="text-center">Actions</th>
                         </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <c:if test="${empty categories}">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open"></i>
+                                        <h5>Aucune catégorie trouvée</h5>
+                                        <p>Cliquez sur "Nouvelle Catégorie" pour en créer une</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:if>
+                        
+                        <c:forEach var="cat" items="${categories}">
+                            <tr>
+                                <td data-label="ID">
+                                    <span class="badge-category">#${cat.id}</span>
+                                </td>
+                                <td data-label="Nom">
+                                    <i class="fas fa-tag text-primary me-2"></i>
+                                    <strong>${cat.nom}</strong>
+                                </td>
+                                <td data-label="Description">
+                                    <c:choose>
+                                        <c:when test="${empty cat.description}">
+                                            <span class="text-muted fst-italic">
+                                                <i class="fas fa-edit me-1"></i> Aucune description
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <i class="fas fa-align-left text-muted me-1"></i>
+                                            ${cat.description}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="action-buttons">
+                                        <a href="categories?action=edit&id=${cat.id}" 
+                                           class="btn btn-warning btn-sm btn-action"
+                                           title="Modifier">
+                                           <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="categories?action=delete&id=${cat.id}" 
+                                           class="btn btn-danger btn-sm btn-action"
+                                           onclick="return confirm('⚠️ Supprimer cette catégorie ?\n\nTous les produits de cette catégorie seront également supprimés !');"
+                                           title="Supprimer">
+                                           <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
             
-            <a href="acceuil" class="btn btn-secondary">
-                <i class="fa fa-arrow-left"></i> Retour à l'accueil
-            </a>
+            <div class="mt-4 text-center">
+                <a href="acceuil" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Retour à l'accueil
+                </a>
+            </div>
         </div>
     </div>
 </div>

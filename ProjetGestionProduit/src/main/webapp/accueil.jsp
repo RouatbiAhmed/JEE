@@ -15,111 +15,172 @@
 
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table-styles.css">
+
+<style>
+    .search-form {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+    
+    .search-form label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-right: 10px;
+    }
+    
+    .search-input {
+        width: 250px;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .search-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .search-form .btn {
+            width: 100%;
+        }
+    }
+</style>
 
 </head>
 <body>
 
-<%@include file="nav.html" %>
-
-<%
-    // Récupérer l'utilisateur connecté depuis la session
-    HttpSession sessionHttp = request.getSession(false);
-    Utilisateur currentUser = (sessionHttp != null) ? (Utilisateur) sessionHttp.getAttribute("user") : null;
-    boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getRole());
-%>
+<%@include file="nav.jsp" %>
 
 <div class="container mt-4">
 
-    <!-- ====== FORMULAIRE RECHERCHE ====== -->
-    <form method="get" action="search" class="mb-3">
-        <label>Mot clé :</label>
-        <input type="text" name="mc" class="form-control w-25 d-inline"
-               value="${param.mc}">
-        <button type="submit" class="btn btn-primary">
-            <i class="fa fa-search"></i> Rechercher
-        </button>
-    </form>
+    <div class="search-form">
+        <form method="get" action="search" class="d-flex flex-wrap align-items-center gap-2">
+            <label><i class="fas fa-search"></i> Mot clé :</label>
+            <input type="text" name="mc" class="form-control search-input"
+                   value="${param.mc}" placeholder="Rechercher un produit...">
+            <button type="submit" class="btn btn-new">
+                <i class="fa fa-search"></i> Rechercher
+            </button>
+        </form>
+    </div>
 
-    <!-- ====== TABLE PRODUITS ====== -->
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>Prix</th>
-                <th>Quantite</th>
-                <th>Catégorie</th> 
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <!-- ====== SI LISTE VIDE ====== -->
-            <c:if test="${empty products}">
+    <div class="table-container">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td colspan="7" class="text-center text-warning">
-                        Aucun produit trouvé.
-                    </td>
+                    <th width="5%"><i class="fas fa-hashtag"></i> #</th>
+                    <th width="5%"><i class="fas fa-id-card"></i> Id</th>
+                    <th width="25%"><i class="fas fa-box"></i> Nom</th>
+                    <th width="15%"><i class="fas fa-euro-sign"></i> Prix</th>
+                    <th width="15%"><i class="fas fa-cubes"></i> Quantite</th>
+                    <th width="20%"><i class="fas fa-tag"></i> Catégorie</th> 
+                    <th width="15%" class="text-center"><i class="fas fa-cogs"></i> Actions</th>
                 </tr>
-            </c:if>
+            </thead>
 
-            <!-- ====== BOUCLE JSTL ====== -->
-            <c:forEach var="p" items="${products}" varStatus="s">
+            <tbody>
 
-                <tr class="${s.index % 2 == 0 ? 'table-light' : 'table-secondary'}">
+                <c:if test="${empty products}">
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <h5>Aucun produit trouvé</h5>
+                                <p>Cliquez sur "Ajouter Produit" pour créer un nouveau produit</p>
+                            </div>
+                        </td>
+                    </tr>
+                </c:if>
 
-                    <!-- Index -->
-                    <td>${s.count}
-                        <c:if test="${s.first}">
-                            <span class="badge bg-success ms-2">Premier</span>
-                        </c:if>
+                <!-- ====== BOUCLE JSTL ====== -->
+                <c:forEach var="p" items="${products}" varStatus="s">
 
-                        <c:if test="${s.last}">
-                            <span class="badge bg-danger ms-2">Dernier</span>
-                        </c:if>
-                    </td>
+                    <tr>
 
-                    <!-- Id -->
-                    <td>${p.id}</td>
+                        <!-- Index -->
+                        <td data-label="#">
+                            <span class="badge-category">${s.count}</span>
+                            <c:if test="${s.first}">
+                                <span class="badge bg-success ms-2">Premier</span>
+                            </c:if>
+                            <c:if test="${s.last}">
+                                <span class="badge bg-danger ms-2">Dernier</span>
+                            </c:if>
+                        </td>
 
-                    <!-- Nom -->
-                    <td>${p.nom}</td>
+                        <!-- Id -->
+                        <td data-label="Id">
+                            <span class="badge-category">${p.id}</span>
+                        </td>
 
-                    <!-- Prix -->
-                    <td>${p.prix}</td>
+                        <!-- Nom -->
+                        <td data-label="Nom">
+                            <i class="fas fa-box text-primary me-2"></i>
+                            <strong>${p.nom}</strong>
+                        </td>
 
-                    <!-- Quantite -->
-                    <td>${p.quantite}</td>
-                    
-                    <!-- Catégorie -->
-                    <td>${p.categorie != null ? p.categorie.nom : 'Sans catégorie'}</td>
+                        <!-- Prix -->
+                        <td data-label="Prix">
+                            <i class="fas fa-euro-sign text-success me-1"></i>
+                            ${p.prix} €
+                        </td>
 
-                    <!-- Actions -->
-                    <td>
-                        <% if (isAdmin) { %>
-                            <a href="update?id=${p.id}" 
-                               class="btn btn-warning btn-sm">
-                               <i class="fa fa-edit"></i>
-                            </a>
+                        <!-- Quantite -->
+                        <td data-label="Quantite">
+                            <i class="fas fa-cubes text-info me-1"></i>
+                            ${p.quantite}
+                        </td>
+                        
+                        <!-- Catégorie -->
+                        <td data-label="Catégorie">
+                            <c:choose>
+                                <c:when test="${not empty p.categorie}">
+                                    <i class="fas fa-tag text-primary me-1"></i>
+                                    ${p.categorie.nom}
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="text-muted fst-italic">
+                                        <i class="fas fa-ban me-1"></i>Sans catégorie
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
 
-                            <a href="delete?id=${p.id}" 
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Confirmer la suppression ?');">
-                               <i class="fa fa-trash"></i>
-                            </a>
-                        <% } else { %>
-                            <span class="text-muted">Aucune action</span>
-                        <% } %>
-                    </td>
+                        <!-- Actions -->
+                        <td data-label="Actions">
+                            <div class="action-buttons">
+                                <% if (isAdmin) { %>
+                                    <a href="update?id=${p.id}" 
+                                       class="btn btn-warning btn-sm btn-action"
+                                       title="Modifier">
+                                       <i class="fas fa-edit"></i>
+                                    </a>
 
-                </tr>
+                                    <a href="delete?id=${p.id}" 
+                                       class="btn btn-danger btn-sm btn-action"
+                                       onclick="return confirm('⚠️ Confirmer la suppression ?\n\nProduit: ${p.nom}\nCette action est irréversible !');"
+                                       title="Supprimer">
+                                       <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                <% } else { %>
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>Aucune action
+                                    </span>
+                                <% } %>
+                            </div>
+                        </td>
 
-            </c:forEach>
+                    </tr>
 
-        </tbody>
-    </table>
+                </c:forEach>
+
+            </tbody>
+        </table>
+    </div>
 
 </div>
 
