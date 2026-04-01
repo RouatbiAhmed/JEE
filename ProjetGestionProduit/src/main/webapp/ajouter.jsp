@@ -17,26 +17,30 @@
 
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+      
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form-styles.css">
 
 </head>
 <body>
 
-<%@include file="nav.html" %>
+<%@include file="nav.jsp" %>
 
 <div class="container mt-5">
-   <div class="card shadow">
-
-        <div class="card-header bg-primary text-white">
-            <h3>
+    <!-- Added form-card class -->
+    <div class="card shadow form-card">
+        <!-- Changed to form-header class -->
+        <div class="card-header form-header">
+            <h3 class="mb-0">
                 <i class="fa fa-box"></i>
                 <c:if test="${empty produit}">Ajouter Produit</c:if>
                 <c:if test="${not empty produit}">Modifier Produit</c:if>
             </h3>
         </div>
 
-        <div class="card-body">
+        <!-- Changed to form-body class -->
+        <div class="card-body form-body">
 
-            <form method="post" action="save">
+            <form method="post" action="${pageContext.request.contextPath}/save">
 
                 <!-- ID caché pour UPDATE -->
                 <input type="hidden" name="id" value="${produit.id}">
@@ -71,35 +75,36 @@
                            class="form-control"
                            required>
                 </div>
-                <!-- Catégorie -->
+                
                 <div class="mb-3">
-                      <label class="form-label">Catégorie :</label>
-                       <select name="categorieId" class="form-select">
-                         <option value="">-- Sélectionner une catégorie --</option>
-                         <c:forEach var="cat" items="${categories}">
-                                   <option value="${cat.id}" 
-                                      <c:if test="${produit.categorie.id eq cat.id}">selected</c:if>>
-                                      ${cat.nom}
-                          </option>
-                </c:forEach>
-               </select>
-                  </div>
+                    <label class="form-label">Catégorie :</label>
+                    <select name="categorieId" class="form-select" required>
+                        <c:forEach var="cat" items="${categories}">
+                            <option value="${cat.id}" 
+                                <c:if test="${produit.categorie.id eq cat.id}">selected</c:if>>
+                                ${cat.nom}
+                            </option>
+                        </c:forEach>
+                    </select>
+                    <div class="invalid-feedback">Veuillez sélectionner une catégorie</div>
+                </div>
 
-                <!-- Bouton -->
-                <button type="submit" class="btn btn-success">
-                    <i class="fa fa-save"></i>
-                    <c:if test="${empty produit}">Ajouter</c:if>
-                    <c:if test="${not empty produit}">Modifier</c:if>
-                </button>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-save"></i>
+                        <c:if test="${empty produit}">Ajouter</c:if>
+                        <c:if test="${not empty produit}">Modifier</c:if>
+                    </button>
 
-                <a href="acceuil" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> Retour
-                </a>
+                    <a href="acceuil" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Retour
+                    </a>
+                </div>
 
             </form>
 
         </div>
-   </div>
+    </div>
 </div>
 
 </body>
