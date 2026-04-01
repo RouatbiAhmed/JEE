@@ -15,9 +15,9 @@ import entity.Utilisateur;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
     
-    private IGestionUtilisateur gestionUtilisateur;
+    private static final long serialVersionUID = 1L;
+	private IGestionUtilisateur gestionUtilisateur;
     
     public void init(ServletConfig config) throws ServletException {
         gestionUtilisateur = new GestionUtilisateurImpJpa();

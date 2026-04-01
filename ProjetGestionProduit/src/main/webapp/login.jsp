@@ -1,6 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="entity.Utilisateur" %>
+
+<%
+    HttpSession sessionHttp = request.getSession(false);
+    Utilisateur currentUser = (sessionHttp != null) ? (Utilisateur) sessionHttp.getAttribute("user") : null;
+    
+    if (currentUser != null) {
+        response.sendRedirect(request.getContextPath() + "/acceuil");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Connexion</title>
@@ -44,6 +57,7 @@
         %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle"></i> <%= error %>
+    //response.getWriter().write(error);
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <%
@@ -72,11 +86,6 @@
         
         <hr>
         
-        <div class="text-center text-muted small">
-            <p>Comptes de test :</p>
-            <p><strong>admin</strong> / admin123 (ADMIN)</p>
-            <p><strong>user1</strong> / user123 (USER)</p>
-        </div>
     </div>
 </div>
 
